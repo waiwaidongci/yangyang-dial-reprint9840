@@ -11,7 +11,7 @@ def report_detail(session, run_id, actor):
             'review': review_info(review) if review else None}
 
 
-def report_csv(session, run_id, key, actor):
-    table = export_table(session, run_id, key, actor)
+def report_csv(session, run_id, key, actor, table_lookup=export_table):
+    table = table_lookup(session, run_id, key, actor)
     return Response(write_rows(table['columns'], table['rows']), media_type='text/csv',
                     headers={'Content-Disposition': f'attachment; filename="run-{run_id}-{table["key"]}.csv"'})

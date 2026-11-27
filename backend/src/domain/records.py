@@ -27,7 +27,7 @@ def parse_reprint(value, split: str, line: int) -> int | None:
     raise ValueError(f"第 {line} 条的已确认返印须填写 0 或 1。")
 
 
-def normalize_rows(rows: list[dict]) -> list[dict]:
+def normalize_rows(rows: list[dict], require_history: bool = True) -> list[dict]:
     ids = set()
     splits_by_batch = {}
     row_counts = Counter()
@@ -54,8 +54,14 @@ def normalize_rows(rows: list[dict]) -> list[dict]:
         normalized.append({key: record[key] for key in COLUMNS})
         row_counts[split] += 1
 
-    if row_counts["train"] < 6 or sum(split == "train" for split in splits_by_batch.values()) < 3:
-        raise ValueError("历史拟合至少需要 6 条已确认记录，且覆盖至少 3 个生产批次。")
-    if row_counts["holdout"] < 2:
-        raise ValueError("留出评估至少需要 2 条来自独立批次的已确认记录。")
+    if require_history:
+        if row_counts["train"] < 6 or sum(split == "train" for split in splits_by_batch.values()) < 3:
+            raise ValueError("历史拟合至少需要 6 条已确认记录，且覆盖至少 3 个生产批次。")
+        if row_counts["holdout"] < 2:
+            raise ValueError("留出评估至少需要 2 条来自独立批次的已确认记录。")
+    else:
+        if row_counts["train"]:
+            raise ValueError("按册编码只收留出或待检首件，历史件已在封账数中。")
+        if not (row_counts["holdout"] or row_counts["pending"]):
+            raise ValueError("按册编码至少需要一条留出或待检首件。")
     return normalized

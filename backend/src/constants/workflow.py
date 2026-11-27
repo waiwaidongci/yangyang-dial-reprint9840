@@ -12,6 +12,15 @@ class RunStatus(StrEnum):
     FAILED = 'failed'
 
 
+class MergeStatus(StrEnum):
+    SEALED = 'sealed'          # both seals present and locked for this version pair
+    CALCULATING = 'calculating'
+    READY = 'ready'            # result computed, awaiting review
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+    FAILED = 'failed'
+
+
 class Decision(StrEnum):
     APPROVED = 'approved'
     REJECTED = 'rejected'
